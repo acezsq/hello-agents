@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:datawhalechina.github.io)",
+      "Bash(git init)"
+    ]
+  }
+}
