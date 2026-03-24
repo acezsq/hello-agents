@@ -125,10 +125,163 @@ Action: ToolName[input] 或 Finish[answer]
 - [x] 理解 ToolExecutor 的作用
 - [x] 理解 Prompt 如何约束 LLM 输出
 - [x] 能够运行基础示例
-- [ ] 接入真实 LLM
+- [x] 接入真实 LLM
 - [ ] 添加自定义工具
 - [ ] 处理复杂多步任务
 
 ---
 
-*学习日期: 2026-03-24*
+## 真实 LLM 版本详解
+
+### 文件对比
+
+| 特性 | 模拟版本 (`react_agent.py`) | 真实版本 (`react_agent_real.py`) |
+|------|----------------------------|----------------------------------|
+| LLM 客户端 | `MockLLM`（预设响应） | `HelloAgentsLLM`（真实 API） |
+| 依赖 | 无需外部依赖 | `openai`、`python-dotenv` |
+| 配置 | 无需配置 | `.env` 文件配置 API |
+| 响应 | 固定、可预测 | 动态生成、真实推理 |
+| 输出 | 一次性输出 | 流式输出（实时显示） |
+
+### HelloAgentsLLM 类
+
+```python
+class HelloAgentsLLM:
+    def __init__(self, model=None, api_key=None, base_url=None):
+        # 从 .env 加载配置
+        load_dotenv()
+
+        # 支持多服务商：OpenAI/AIHubmix/阿里云
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout
+        )
+
+    def think(self, messages, temperature=0) -> str:
+        # 流式调用 LLM
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=temperature,
+            stream=True  # 流式输出
+        )
+        # 实时输出每个 chunk
+```
+
+### 多服务商配置
+
+通过 `.env` 文件切换不同 LLM：
+
+```bash
+# AIHubmix（当前使用，有免费额度）
+LLM_API_KEY=sk-xxx
+LLM_MODEL_ID=coding-glm-4.7-free
+LLM_BASE_URL=https://aihubmix.com/v1
+
+# OpenAI 官方
+LLM_API_KEY=sk-xxx
+LLM_MODEL_ID=gpt-3.5-turbo
+LLM_BASE_URL=https://api.openai.com/v1
+
+# 阿里云百炼
+LLM_API_KEY=sk-xxx
+LLM_MODEL_ID=qwen-turbo
+LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+```
+
+### 实际运行效果
+
+```
+🚀 ReAct Agent - 真实 LLM 版本
+============================================================
+📋 环境检查:
+   LLM_API_KEY: ✅ 已设置
+   LLM_MODEL_ID: coding-glm-4.7-free
+
+🔌 连接 LLM...
+   模型: coding-glm-4.7-free
+
+📝 请输入问题: 计算 25 * 4 + 100 等于多少？
+
+============================================================
+🎯 问题: 计算 25 * 4 + 100 等于多少？
+============================================================
+
+────────────────────────────────────────
+📍 步骤 1/5
+────────────────────────────────────────
+🧠 调用模型: coding-glm-4.7-free
+我需要先计算 25 * 4。Thought: 我需要先计算 25 * 4。
+
+Action: Calculator[25 * 4]
+
+🤔 Thought:
+我需要先计算 25 * 4。
+🎬 Action: Calculator[25 * 4]
+🔧 执行计算器: 25 * 4
+👀 Observation: 100
+
+────────────────────────────────────────
+📍 步骤 2/5
+────────────────────────────────────────
+🧠 调用模型: coding-glm-4.7-free
+现在计算 100 + 100。Thought: 现在计算 100 + 100。
+
+Action: Calculator[100 + 100]
+
+🤔 Thought:
+现在计算 100 + 100。
+🎬 Action: Calculator[100 + 100]
+🔧 执行计算器: 100 + 100
+👀 Observation: 200
+
+────────────────────────────────────────
+📍 步骤 3/5
+────────────────────────────────────────
+🧠 调用模型: coding-glm-4.7-free
+最终结果是 200。Thought: 最终结果是 200。
+
+Action: Finish[200]
+
+🤔 Thought:
+最终结果是 200。
+
+============================================================
+🎉 最终答案: 200
+============================================================
+```
+
+### 关键改进点
+
+1. **流式输出** - `stream=True` 实现实时显示，提升用户体验
+2. **环境隔离** - `.env` 管理密钥，`.gitignore` 保护不上传
+3. **交互模式** - 支持连续提问，无需重启程序
+4. **错误处理** - API 失败时优雅退出并提示
+5. **多服务商** - 一份代码支持 OpenAI/AIHubmix/阿里云等
+
+### 扩展自定义工具
+
+```python
+# 1. 定义工具函数
+def search(query: str) -> str:
+    """搜索工具"""
+    return f"搜索结果: {query}"
+
+# 2. 注册到 ToolExecutor
+tools.register(
+    "Search",
+    "网页搜索，如 Search[Python教程]",
+    search
+)
+
+# 3. Agent 自动学会使用
+# LLM 会根据描述理解工具用途并调用
+```
+
+### 安全注意事项
+
+- ✅ API 密钥存储在 `.env`，已添加 `.gitignore`
+- ⚠️ 不要将 `.env` 文件内容分享到公开场合
+- ⚠️ 定期轮换 API 密钥
+- ✅ 使用免费额度服务（如 AIHubmix）进行学习测试
