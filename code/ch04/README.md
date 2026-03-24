@@ -1,14 +1,25 @@
-# Chapter 4: ReAct Agent 实现
+# Chapter 4: Agent 经典范式实现
 
-本章代码实现了 ReAct (Reasoning + Acting) 智能体范式。
+本章实现了三种经典的 Agent 架构范式：ReAct、Plan-and-Solve、Reflection
 
 ## 文件说明
 
-| 文件 | 说明 |
-|------|------|
-| `react_agent.py` | 模拟 LLM 版本（无需 API，直接运行演示） |
-| `react_agent_real.py` | 真实 LLM 版本（需要配置 API） |
-| `.env.example` | 环境变量配置模板 |
+| 文件 | 范式 | 说明 |
+|------|------|------|
+| `react_agent.py` | ReAct | 模拟 LLM 版本（无需 API） |
+| `react_agent_real.py` | ReAct | 真实 LLM 版本（需要 API） |
+| `plan_and_solve_agent.py` | Plan-and-Solve | 先规划后执行范式 |
+| `.env.example` | - | 环境变量配置模板 |
+
+---
+
+## 范式对比
+
+| 范式 | 核心策略 | 最佳适用场景 |
+|------|----------|--------------|
+| **ReAct** | Think-Act-Observe 循环 | 外部工具调用、动态环境交互 |
+| **Plan-and-Solve** | 先规划，后执行 | 结构化、多步骤推理任务 |
+| **Reflection** | Execute-Reflect-Refine | 质量要求高、可迭代优化 |
 
 ## 快速开始
 
@@ -78,6 +89,8 @@ python react_agent_real.py
 
 ## 使用示例
 
+### ReAct Agent
+
 启动后，可以输入以下问题测试：
 
 ```
@@ -91,6 +104,28 @@ python react_agent_real.py
 执行 Python 代码计算 2 的 10 次方
 帮我读取 README.md 文件内容
 ```
+
+### Plan-and-Solve Agent
+
+适合需要**整体规划**的任务：
+
+```bash
+python plan_and_solve_agent.py
+```
+
+**示例问题**:
+
+```
+帮我制定一个学习 Python 的 4 周计划
+如何准备一次技术面试？
+写一份上海三日游攻略
+解释什么是机器学习，并举例说明应用场景
+```
+
+**特点**:
+- 先规划：生成有序的步骤列表
+- 后执行：逐个步骤详细解答
+- 适合：学习计划、攻略制定、结构化文档
 
 ## 自定义工具
 
@@ -106,4 +141,5 @@ tools.register("MyTool", "工具描述", my_tool)
 ## 学习资源
 
 - [ReAct 学习总结](../../notes/ch04-react-summary.md)
+- [Plan-and-Solve 学习总结](../../notes/ch04-plan-and-solve-summary.md)
 - [官方教程](https://datawhalechina.github.io/hello-agents/#/./chapter4/)
