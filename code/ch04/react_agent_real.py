@@ -102,6 +102,163 @@ def weather_query(city: str) -> str:
     return weather_db.get(city, f"暂无 {city} 的天气信息，请尝试其他城市")
 
 
+# ============ 2.1 新增自定义工具 ============
+
+def current_time(format: str = "%Y-%m-%d %H:%M:%S") -> str:
+    """获取当前时间
+    用法: CurrentTime[%Y-%m-%d %H:%M:%S] 或 CurrentTime[now]
+    """
+    from datetime import datetime
+    print(f"🔧 获取当前时间")
+    try:
+        if format.lower() in ('now', 'today', 'current'):
+            format = "%Y-%m-%d %H:%M:%S"
+        return datetime.now().strftime(format)
+    except Exception as e:
+        return f"时间格式错误: {e}，使用默认格式: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+
+def file_reader(filepath: str) -> str:
+    """读取文件内容
+    用法: FileReader[文件路径]
+    注意: 只能读取项目目录下的文件，且有大小限制
+    """
+    import os
+    print(f"🔧 读取文件: {filepath}")
+
+    # 安全检查：禁止访问系统敏感文件
+    forbidden = ['/etc/', '/sys/', '/proc/', '/dev/', 'C:\\Windows', '.ssh', '.env']
+    for f in forbidden:
+        if f in filepath:
+            return f"错误：禁止访问敏感路径 {f}"
+
+    # 限制在项目目录内
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if not os.path.isabs(filepath):
+        filepath = os.path.join(base_dir, filepath)
+
+    try:
+        if not os.path.exists(filepath):
+            return f"错误：文件不存在 {filepath}"
+
+        # 文件大小限制 100KB
+        size = os.path.getsize(filepath)
+        if size > 100 * 1024:
+            return f"错误：文件过大 ({size} 字节)，限制 100KB"
+
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # 截断过长内容
+        if len(content) > 2000:
+            content = content[:2000] + f"\n... (已截断，共 {len(content)} 字符)"
+
+        return f"文件内容:\n{content}"
+
+    except Exception as e:
+        return f"读取错误: {e}"
+
+
+def web_search(query: str) -> str:
+    """模拟网页搜索
+    用法: WebSearch[搜索关键词]
+    注意: 这是模拟数据，实际使用时可以接入真实搜索API
+    """
+    print(f"🔧 搜索: {query}")
+
+    # 模拟搜索结果数据库
+    search_db = {
+        "python": "Python 是一种流行的编程语言，由 Guido van Rossum 于 1991 年创建。特点：简洁易读、丰富的库、广泛应用。",
+        "react": "React 是 Meta 开发的前端框架，使用组件化开发和虚拟 DOM。",
+        "人工智能": "人工智能(AI)是计算机科学的一个分支，致力于创建能够执行通常需要人类智能的任务的系统。",
+        "机器学习": "机器学习是 AI 的子集，通过数据训练模型，使计算机能够从经验中学习。",
+        "docker": "Docker 是一个开源平台，用于开发、部署和运行应用程序的容器。",
+        "git": "Git 是一个分布式版本控制系统，用于跟踪代码变更。",
+    }
+
+    # 简单匹配
+    query_lower = query.lower()
+    for keyword, result in search_db.items():
+        if keyword in query_lower:
+            return f"搜索结果: {result}"
+
+    # 默认回复
+    return f"搜索 '{query}' 没有找到精确结果。建议尝试: Python, React, 人工智能, 机器学习, Docker, Git"
+
+
+def python_runner(code: str) -> str:
+    """安全执行 Python 代码（受限环境）
+    用法: PythonRunner[print('hello')]
+    注意: 仅支持基础操作，禁止危险函数
+    """
+    import io
+    import sys
+    import math
+    import random
+    import json
+
+    print(f"🔧 执行 Python 代码: {code[:50]}{'...' if len(code) > 50 else ''}")
+
+    # 危险关键字检查
+    dangerous = ['import os', 'import sys', 'exec(', 'eval(', '__import__',
+                 'open(', 'file(', 'subprocess', 'shell', 'system(']
+    for d in dangerous:
+        if d in code.lower():
+            return f"错误：代码包含危险操作 '{d}'，已禁止执行"
+
+    # 创建受限执行环境
+    safe_globals = {
+        '__builtins__': {
+            'print': print,
+            'len': len,
+            'range': range,
+            'enumerate': enumerate,
+            'zip': zip,
+            'map': map,
+            'filter': filter,
+            'sum': sum,
+            'min': min,
+            'max': max,
+            'abs': abs,
+            'round': round,
+            'str': str,
+            'int': int,
+            'float': float,
+            'list': list,
+            'dict': dict,
+            'tuple': tuple,
+            'set': set,
+            'type': type,
+            'isinstance': isinstance,
+            'True': True,
+            'False': False,
+            'None': None,
+        },
+        'math': math,
+        'random': random,
+        'json': json,
+    }
+
+    # 捕获输出
+    old_stdout = sys.stdout
+    sys.stdout = io.StringIO()
+
+    try:
+        # 限制代码长度
+        if len(code) > 1000:
+            return "错误：代码过长，限制 1000 字符"
+
+        exec(code, safe_globals, {})
+        output = sys.stdout.getvalue()
+        sys.stdout = old_stdout
+
+        return f"执行结果:\n{output}" if output else "执行成功（无输出）"
+
+    except Exception as e:
+        sys.stdout = old_stdout
+        return f"执行错误: {e}"
+
+
 # ============ 3. 工具执行器 ============
 
 class ToolExecutor:
@@ -320,6 +477,8 @@ def main():
 
         # 2. 创建工具执行器并注册工具
         tools = ToolExecutor()
+
+        # 基础工具
         tools.register(
             "Calculator",
             "计算器，用于数学运算，如 Calculator[25 * 4]、Calculator[100 + 200 - 50]",
@@ -330,6 +489,33 @@ def main():
             "天气查询，获取城市天气信息，如 Weather[北京]、Weather[上海]",
             weather_query
         )
+
+        # 新增自定义工具
+        tools.register(
+            "CurrentTime",
+            "获取当前时间，如 CurrentTime[now] 或 CurrentTime[%Y-%m-%d]",
+            current_time
+        )
+        tools.register(
+            "FileReader",
+            "读取项目目录下的文件内容，如 FileReader[README.md]",
+            file_reader
+        )
+        tools.register(
+            "WebSearch",
+            "网页搜索（模拟数据），如 WebSearch[Python教程]、WebSearch[Docker]",
+            web_search
+        )
+        tools.register(
+            "PythonRunner",
+            "安全执行简单 Python 代码，如 PythonRunner[print(2+3)]、PythonRunner[import math; print(math.pi)]",
+            python_runner
+        )
+
+        print(f"📦 已加载 {len(tools.tools)} 个工具:")
+        for name in tools.tools.keys():
+            print(f"   - {name}")
+        print()
 
         # 3. 创建 Agent
         agent = ReActAgent(llm, tools, max_steps=5)
@@ -342,6 +528,10 @@ def main():
         examples = [
             "计算 125 * 8 + 500 等于多少？",
             "北京和上海哪个城市今天更暖和？",
+            "现在几点了？",
+            "搜索一下 Python 是什么",
+            "执行 Python 代码计算 100 的阶乘",
+            "帮我读取 README.md 文件内容",
         ]
 
         print("\n📚 示例问题（可直接复制使用）:")
