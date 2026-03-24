@@ -5,7 +5,11 @@
       "Bash(git init)",
       "Bash(git add .)",
       "Bash(git commit:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(/Users/zsq/learn/hello-agents/.gitignore:*)",
+      "Bash(python3 -c \"\nfrom dotenv import load_dotenv\nimport os\n\nload_dotenv\\(\\)\n\nprint\\(''✅ 环境变量检查:''\\)\nprint\\(f''   LLM_API_KEY: {\"\"已设置\"\" if os.getenv\\(\"\"LLM_API_KEY\"\"\\) else \"\"未设置\"\"} \\({len\\(os.getenv\\(\"\"LLM_API_KEY\"\", \"\"\"\"\\)\\)} 字符\\)''\\)\nprint\\(f''   LLM_MODEL_ID: {os.getenv\\(\"\"LLM_MODEL_ID\"\", \"\"未设置\"\"\\)}''\\)\nprint\\(f''   LLM_BASE_URL: {os.getenv\\(\"\"LLM_BASE_URL\"\", \"\"未设置\"\"\\)}''\\)\nprint\\(\\)\nprint\\(''配置完成！可以运行: python3 react_agent_real.py''\\)\n\")",
+      "Bash(pip3 install python-dotenv openai)",
+      "Bash(python3 -c:*)"
     ]
   }
 }

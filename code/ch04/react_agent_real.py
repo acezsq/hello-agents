@@ -26,7 +26,12 @@ class HelloAgentsLLM:
         if not OPENAI_AVAILABLE:
             raise ImportError("请先安装 openai: pip install openai")
 
-        load_dotenv()
+        # 从当前目录加载 .env
+        env_path = os.path.join(os.path.dirname(__file__), '.env')
+        if os.path.exists(env_path):
+            load_dotenv(env_path)
+        else:
+            load_dotenv()
 
         self.model = model or os.getenv("LLM_MODEL_ID", "gpt-3.5-turbo")
         api_key = api_key or os.getenv("LLM_API_KEY")
@@ -277,8 +282,13 @@ def main():
     print("=" * 60)
     print()
 
-    # 检查环境变量
-    load_dotenv()
+    # 从当前目录加载 .env
+    env_path = os.path.join(os.path.dirname(__file__), '.env')
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+    else:
+        load_dotenv()
+
     api_key = os.getenv("LLM_API_KEY")
     model = os.getenv("LLM_MODEL_ID")
 
