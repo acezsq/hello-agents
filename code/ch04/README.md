@@ -60,8 +60,37 @@ python react_agent_real.py
 
 ## 已集成的工具
 
-- `Calculator` - 数学计算器
-- `Weather` - 天气查询（模拟数据）
+### 基础工具
+
+| 工具 | 功能 | 示例 |
+|------|------|------|
+| `Calculator` | 数学计算器 | `Calculator[25 * 4 + 100]` |
+| `Weather` | 天气查询（模拟数据） | `Weather[北京]` |
+
+### 自定义工具
+
+| 工具 | 功能 | 示例 | 安全特性 |
+|------|------|------|----------|
+| `CurrentTime` | 获取当前时间 | `CurrentTime[now]` | - |
+| `FileReader` | 读取项目目录下的文件 | `FileReader[README.md]` | 禁止敏感路径、大小限制 100KB |
+| `WebSearch` | 网页搜索（模拟数据） | `WebSearch[Python教程]` | - |
+| `PythonRunner` | 安全执行 Python 代码 | `PythonRunner[print(2+3)]` | 危险代码过滤、受限环境 |
+
+## 使用示例
+
+启动后，可以输入以下问题测试：
+
+```
+# 基础工具
+计算 125 * 8 + 500 等于多少？
+北京和上海哪个城市今天更暖和？
+
+# 自定义工具
+现在几点了？
+搜索一下 Python 是什么
+执行 Python 代码计算 2 的 10 次方
+帮我读取 README.md 文件内容
+```
 
 ## 自定义工具
 

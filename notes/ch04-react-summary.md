@@ -285,3 +285,129 @@ tools.register(
 - ⚠️ 不要将 `.env` 文件内容分享到公开场合
 - ⚠️ 定期轮换 API 密钥
 - ✅ 使用免费额度服务（如 AIHubmix）进行学习测试
+
+---
+
+## 自定义工具实战
+
+### 已实现的工具列表
+
+| 工具名 | 功能 | 示例用法 | 安全特性 |
+|--------|------|----------|----------|
+| **Calculator** | 数学计算 | `Calculator[25 * 4]` | 字符白名单过滤 |
+| **Weather** | 天气查询 | `Weather[北京]` | 模拟数据 |
+| **CurrentTime** | 获取当前时间 | `CurrentTime[now]` | - |
+| **FileReader** | 读取文件 | `FileReader[README.md]` | 禁止敏感路径、大小限制 |
+| **WebSearch** | 网页搜索 | `WebSearch[Python教程]` | 模拟数据 |
+| **PythonRunner** | 执行 Python 代码 | `PythonRunner[print(2+3)]` | 危险代码过滤、受限环境 |
+
+### 工具测试记录
+
+#### 1. CurrentTime 工具
+
+**问题**: "现在几点了？"
+
+```
+📍 步骤 1/5
+🧠 调用模型: coding-glm-4.7-free
+🤔 Thought: 用户询问现在几点了，需要获取当前时间信息
+🎬 Action: CurrentTime[now]
+🔧 获取当前时间
+👀 Observation: 2026-03-24 23:12:30
+
+📍 步骤 2/5
+🤔 Thought: 已经获取到当前时间为 2026-03-24 23:12:30，可以直接回答用户
+🎉 最终答案: 现在是 2026年3月24日 23点12分30秒
+```
+
+#### 2. WebSearch 工具
+
+**问题**: "搜索一下 Python 是什么"
+
+```
+📍 步骤 1/5
+🧠 调用模型: coding-glm-4.7-free
+🤔 Thought: 用户想要了解 Python 是什么，我需要使用网页搜索工具
+🎬 Action: WebSearch[Python是什么]
+🔧 搜索: Python是什么
+👀 Observation: 搜索结果: Python 是一种流行的编程语言...
+
+📍 步骤 2/5
+🤔 Thought: 已经通过 WebSearch 获取到了 Python 的相关信息
+🎉 最终答案: Python 是一种流行的编程语言，由 Guido van Rossum 于 1991 年创建...
+```
+
+#### 3. PythonRunner 工具
+
+**问题**: "执行 Python 代码计算 2 的 10 次方"
+
+```
+📍 步骤 1/5
+🧠 调用模型: coding-glm-4.7-free
+🤔 Thought: 用户要求执行 Python 代码计算 2 的 10 次方
+🎬 Action: PythonRunner[2**10]
+🔧 执行 Python 代码: 2**10
+👀 Observation: 执行成功（无输出）
+
+📍 步骤 2/5
+🧠 调用模型: coding-glm-4.7-free
+🤔 Thought: 上一步执行了 2**10，但没有使用 print 函数，所以没有输出
+🎬 Action: PythonRunner[print(2**10)]
+🔧 执行 Python 代码: print(2**10)
+👀 Observation: 执行结果:\n1024
+
+🎉 最终答案: 2 的 10 次方等于 1024
+```
+
+**关键观察**: LLM 能够从第一次无输出中**自我反思**，自动修正代码添加 `print()`，体现了 ReAct 的迭代优化能力。
+
+### 添加新工具的步骤
+
+```python
+# 步骤 1: 定义工具函数
+def my_tool(input_str: str) -> str:
+    """
+    工具描述，会被放入 Prompt 中让 LLM 理解
+    """
+    # 实现工具逻辑
+    result = process(input_str)
+    return f"结果: {result}"
+
+# 步骤 2: 注册到 ToolExecutor
+tools.register(
+    "MyTool",           # 工具名称（大写驼峰）
+    "工具功能描述",      # 描述（LLM 通过此描述选择工具）
+    my_tool             # 函数
+)
+
+# 步骤 3: Agent 自动学会使用
+# LLM 会根据工具描述，在需要时自动调用 MyTool[input]
+```
+
+### 工具设计最佳实践
+
+1. **明确的描述**: 让 LLM 理解工具用途和参数格式
+2. **参数简洁**: 单个字符串输入，复杂数据用 JSON
+3. **错误处理**: 返回清晰的错误信息而非抛出异常
+4. **安全限制**:
+   - 文件操作限制路径和大小
+   - 代码执行过滤危险关键字
+   - 网络请求设置超时
+5. **输出格式**: 统一格式便于 LLM 理解
+
+---
+
+## 学习检查清单（更新）
+
+- [x] 理解 ReAct 核心循环
+- [x] 理解 ToolExecutor 的作用
+- [x] 理解 Prompt 如何约束 LLM 输出
+- [x] 能够运行基础示例
+- [x] 接入真实 LLM
+- [x] **添加自定义工具** ✅ 已完成
+- [x] **测试多工具协作** ✅ 已完成
+- [ ] 处理复杂多步任务
+
+---
+
+*学习日期: 2026-03-24*
