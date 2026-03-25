@@ -9,6 +9,7 @@
 | `react_agent.py` | ReAct | 模拟 LLM 版本（无需 API） |
 | `react_agent_real.py` | ReAct | 真实 LLM 版本（需要 API） |
 | `plan_and_solve_agent.py` | Plan-and-Solve | 先规划后执行范式 |
+| `reflection_agent.py` | Reflection | 自我反思优化范式 |
 | `.env.example` | - | 环境变量配置模板 |
 
 ---
@@ -105,6 +106,34 @@ python react_agent_real.py
 帮我读取 README.md 文件内容
 ```
 
+### Reflection Agent
+
+适合需要**迭代优化质量**的任务：
+
+```bash
+python reflection_agent.py
+```
+
+**示例任务**:
+
+```
+写一个 Python 函数，计算斐波那契数列的第 n 项
+写一篇 200 字的自我介绍
+写一首关于春天的五言绝句
+解释什么是机器学习，用通俗的语言
+```
+
+**运行流程**:
+1. 📝 初始生成：生成第一版结果
+2. 🔍 反思审查：评审专家角色审查问题
+3. ✨ 优化改进：根据反馈优化
+4. 🔄 重复 2-3 直到收敛或达到最大迭代次数
+
+**特点**:
+- 迭代优化，质量逐步提升
+- 自动判断是否需要继续优化
+- 记录完整优化轨迹
+
 ### Plan-and-Solve Agent
 
 适合需要**整体规划**的任务：
@@ -113,7 +142,7 @@ python react_agent_real.py
 python plan_and_solve_agent.py
 ```
 
-**示例问题**:
+**示例任务**:
 
 ```
 帮我制定一个学习 Python 的 4 周计划
@@ -142,4 +171,5 @@ tools.register("MyTool", "工具描述", my_tool)
 
 - [ReAct 学习总结](../../notes/ch04-react-summary.md)
 - [Plan-and-Solve 学习总结](../../notes/ch04-plan-and-solve-summary.md)
+- [Reflection 学习总结](../../notes/ch04-reflection-summary.md)
 - [官方教程](https://datawhalechina.github.io/hello-agents/#/./chapter4/)
